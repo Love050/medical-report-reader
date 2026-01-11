@@ -6,8 +6,6 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import base64
-import io
-from PIL import Image
 from datetime import datetime
 import os
 import httpx
@@ -364,91 +362,12 @@ async def read_root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-# OCR endpoint - Extract text from uploaded image
-@app.post("/api/ocr")
-async def extract_text_from_image(file: UploadFile = File(...)):
-    """
-    Extract text from uploaded medical report image using EasyOCR (works on render.com)
-    """
-    try:OCR.space API (free, lightweight)
-    """
-    try:
-        # Read image file
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
-        
-        print(f"Image received: {file.filename}, Size: {len(contents)} bytes")
-        print(f"Image format: {image.format}, Size: {image.size}, Mode: {image.mode}")
-        
-        # Use OCR.space API (free tier, no memory overhead)
-        try:
-            print("Attempting OCR with OCR.space API...")
-            
-            # Convert image to base64
-            buffered = io.BytesIO()
-            image.save(buffered, format=image.format or "PNG")
-            img_base64 = base64.b64encode(buffered.getvalue()).decode()
-            
-            # Call OCR.space API
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    "https://api.ocr.space/parse/image",
-                    data={
-                        "base64Image": f"data:image/{image.format or 'png'};base64,{img_base64}",
-                        "apikey": "K87899142388957",  # Free API key
-                        "language": "eng",
-                        "isOverlayRequired": False,
-                        "OCREngine": 2  # Engine 2 is better for tables/structured text
-                    }
-                )
-                
-                result = response.json()
-                
-                if result.get("IsErroredOnProcessing"):
-                    raise Exception(result.get("ErrorMessage", ["Unknown error"])[0])
-                
-                # Extract text
-                extracted_text = ""
-                if result.get("ParsedResults"):
-                    for parsed_result in result["ParsedResults"]:
-                        extracted_text += parsed_result.get("ParsedText", "")
-                
-                extracted_text = extracted_text.strip()
-                print(f"OCR result length: {len(extracted_text) if extracted_text else 0} characters")
-                
-                if extracted_text:
-                    print(f"First 100 chars: {extracted_text[:100]}")
-            
-        except Exception as ocr_errorOCR.space API!")
-        return {
-            "success": True,
-            "extracted_text": extracted_text.strip(),
-            "message": "Text extracted successfully using OCR.space APIlease ensure:\n1. Image is clear and readable\n2. Text in image is not too small\n3. Image format is valid"
-                }
-            )
-        
-        # Check if text was extracted
-        if not extracted_text or len(extracted_text.strip()) < 10:
-            print("No text extracted or text too short")
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "success": False,
-                    "message": "Could not extract readable text from the image.\n\nPlease ensure:\n1. Image is clear and well-lit\n2. Text is in focus and readable\n3. Text is not too small\n4. Image format is JPG or PNG"
-                }
-            )
-        
-        print("✅ OCR successful with EasyOCR!")
-        return {
-            "success": True,
-            "extracted_text": extracted_text.strip(),
-            "message": "Text extracted successfully using EasyOCR"
-        }
-    except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
+# Health check endpoint
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+# Note: OCR is handled client-side with Tesseract.js to save server memory on render.com free tier
 
 # Combined analysis and recommendations endpoint
 @app.post("/api/analyze-complete")

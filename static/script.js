@@ -173,20 +173,36 @@ async function analyzeReport() {
 
 // API Calls
 async function extractTextFromImage(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    
     try {
-        const response = await fetch('/api/ocr', {
-            method: 'POST',
-            body: formData
-        });
+        console.log('Starting client-side OCR with Tesseract.js...');
         
-        const result = await response.json();
-        return result;
+        // Use Tesseract.js for client-side OCR (no server memory needed)
+        const result = await Tesseract.recognize(
+            file,
+            'eng',
+            {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+                    }
+                }
+            }
+        );
+        
+        const extractedText = result.data.text;
+        console.log(`OCR completed. Extracted ${extractedText.length} characters`);
+        
+        return {
+            success: true,
+            extracted_text: extractedText,
+            message: 'Text extracted successfully'
+        };
     } catch (error) {
         console.error('OCR error:', error);
-        throw new Error('Failed to process image. Please try again.');
+        return {
+            success: false,
+            message: 'Failed to extract text from image. Please try again.'
+        };
     }
 }
 
