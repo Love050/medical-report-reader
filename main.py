@@ -8,8 +8,6 @@ import uvicorn
 import base64
 import io
 from PIL import Image
-import easyocr
-import numpy as np
 from datetime import datetime
 import os
 import httpx
@@ -70,12 +68,8 @@ if OPENROUTER_API_KEY:
 print(f"\n📡 Priority: Gemini → Groq → Hugging Face → OpenAI → OpenRouter")
 print("="*50)
 
-# Initialize EasyOCR reader (works on render.com without system dependencies)
-print("\n🔍 Initializing EasyOCR...")
-print("⏳ Please wait 1-2 minutes for first-time model download...")
-print("💡 Subsequent starts will be much faster!")
-ocr_reader = easyocr.Reader(['en'], gpu=False)  # CPU mode for render.com
-print("✅ EasyOCR ready!\n")
+# No OCR initialization needed - using lightweight API-based OCR for render.com
+print("\n✅ Using OCR.space API (lightweight, no memory overhead)\n")
 
 app = FastAPI(
     title="Medical Report Reader API",
@@ -376,6 +370,8 @@ async def extract_text_from_image(file: UploadFile = File(...)):
     """
     Extract text from uploaded medical report image using EasyOCR (works on render.com)
     """
+    try:OCR.space API (free, lightweight)
+    """
     try:
         # Read image file
         contents = await file.read()
@@ -384,33 +380,50 @@ async def extract_text_from_image(file: UploadFile = File(...)):
         print(f"Image received: {file.filename}, Size: {len(contents)} bytes")
         print(f"Image format: {image.format}, Size: {image.size}, Mode: {image.mode}")
         
-        # Convert PIL Image to numpy array for EasyOCR
-        image_array = np.array(image)
-        
-        # Use EasyOCR
+        # Use OCR.space API (free tier, no memory overhead)
         try:
-            print("Attempting OCR with EasyOCR...")
-            result = ocr_reader.readtext(image_array)
+            print("Attempting OCR with OCR.space API...")
             
-            # Extract text from EasyOCR result
-            extracted_text = ""
-            for detection in result:
-                text = detection[1]  # detection[1] contains the text
-                extracted_text += text + " "
+            # Convert image to base64
+            buffered = io.BytesIO()
+            image.save(buffered, format=image.format or "PNG")
+            img_base64 = base64.b64encode(buffered.getvalue()).decode()
             
-            extracted_text = extracted_text.strip()
-            print(f"OCR result length: {len(extracted_text) if extracted_text else 0} characters")
+            # Call OCR.space API
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://api.ocr.space/parse/image",
+                    data={
+                        "base64Image": f"data:image/{image.format or 'png'};base64,{img_base64}",
+                        "apikey": "K87899142388957",  # Free API key
+                        "language": "eng",
+                        "isOverlayRequired": False,
+                        "OCREngine": 2  # Engine 2 is better for tables/structured text
+                    }
+                )
+                
+                result = response.json()
+                
+                if result.get("IsErroredOnProcessing"):
+                    raise Exception(result.get("ErrorMessage", ["Unknown error"])[0])
+                
+                # Extract text
+                extracted_text = ""
+                if result.get("ParsedResults"):
+                    for parsed_result in result["ParsedResults"]:
+                        extracted_text += parsed_result.get("ParsedText", "")
+                
+                extracted_text = extracted_text.strip()
+                print(f"OCR result length: {len(extracted_text) if extracted_text else 0} characters")
+                
+                if extracted_text:
+                    print(f"First 100 chars: {extracted_text[:100]}")
             
-            if extracted_text:
-                print(f"First 100 chars: {extracted_text[:100]}")
-            
-        except Exception as ocr_error:
-            print(f"EasyOCR error: {str(ocr_error)}")
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "success": False,
-                    "message": f"OCR Error: {str(ocr_error)}\n\nPlease ensure:\n1. Image is clear and readable\n2. Text in image is not too small\n3. Image format is valid"
+        except Exception as ocr_errorOCR.space API!")
+        return {
+            "success": True,
+            "extracted_text": extracted_text.strip(),
+            "message": "Text extracted successfully using OCR.space APIlease ensure:\n1. Image is clear and readable\n2. Text in image is not too small\n3. Image format is valid"
                 }
             )
         
