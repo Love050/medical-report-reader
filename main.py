@@ -8,7 +8,8 @@ import uvicorn
 import base64
 import io
 from PIL import Image
-import pytesseract
+import easyocr
+import numpy as np
 from datetime import datetime
 import os
 import httpx
@@ -68,6 +69,13 @@ if OPENROUTER_API_KEY:
     print(f"    Models: {len(FREE_MODELS)} available")
 print(f"\n📡 Priority: Gemini → Groq → Hugging Face → OpenAI → OpenRouter")
 print("="*50)
+
+# Initialize EasyOCR reader (works on render.com without system dependencies)
+print("\n🔍 Initializing EasyOCR...")
+print("⏳ Please wait 1-2 minutes for first-time model download...")
+print("💡 Subsequent starts will be much faster!")
+ocr_reader = easyocr.Reader(['en'], gpu=False)  # CPU mode for render.com
+print("✅ EasyOCR ready!\n")
 
 app = FastAPI(
     title="Medical Report Reader API",
@@ -366,7 +374,7 @@ async def health_check():
 @app.post("/api/ocr")
 async def extract_text_from_image(file: UploadFile = File(...)):
     """
-    Extract text from uploaded medical report image using Tesseract OCR
+    Extract text from uploaded medical report image using EasyOCR (works on render.com)
     """
     try:
         # Read image file
@@ -376,34 +384,33 @@ async def extract_text_from_image(file: UploadFile = File(...)):
         print(f"Image received: {file.filename}, Size: {len(contents)} bytes")
         print(f"Image format: {image.format}, Size: {image.size}, Mode: {image.mode}")
         
-        # Use Tesseract OCR
+        # Convert PIL Image to numpy array for EasyOCR
+        image_array = np.array(image)
+        
+        # Use EasyOCR
         try:
-            # Set Tesseract executable path
-            pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            print("Attempting OCR with EasyOCR...")
+            result = ocr_reader.readtext(image_array)
             
-            print("Attempting OCR with Tesseract...")
-            extracted_text = pytesseract.image_to_string(image)
+            # Extract text from EasyOCR result
+            extracted_text = ""
+            for detection in result:
+                text = detection[1]  # detection[1] contains the text
+                extracted_text += text + " "
+            
+            extracted_text = extracted_text.strip()
             print(f"OCR result length: {len(extracted_text) if extracted_text else 0} characters")
             
             if extracted_text:
                 print(f"First 100 chars: {extracted_text[:100]}")
             
-        except pytesseract.TesseractNotFoundError as e:
-            print(f"Tesseract not found: {str(e)}")
+        except Exception as ocr_error:
+            print(f"EasyOCR error: {str(ocr_error)}")
             return JSONResponse(
                 status_code=500,
                 content={
                     "success": False,
-                    "message": "Tesseract OCR is not installed.\n\nTo install:\nWindows: Download from https://github.com/UB-Mannheim/tesseract/wiki\nMac: brew install tesseract\nLinux: sudo apt-get install tesseract-ocr\n\nAfter installation, restart the server."
-                }
-            )
-        except Exception as tesseract_error:
-            print(f"Tesseract OCR error: {str(tesseract_error)}")
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "success": False,
-                    "message": f"OCR Error: {str(tesseract_error)}\n\nPlease ensure:\n1. Tesseract is installed\n2. Image is clear and readable\n3. Text in image is not too small"
+                    "message": f"OCR Error: {str(ocr_error)}\n\nPlease ensure:\n1. Image is clear and readable\n2. Text in image is not too small\n3. Image format is valid"
                 }
             )
         
@@ -418,11 +425,11 @@ async def extract_text_from_image(file: UploadFile = File(...)):
                 }
             )
         
-        print("✅ OCR successful with Tesseract!")
+        print("✅ OCR successful with EasyOCR!")
         return {
             "success": True,
             "extracted_text": extracted_text.strip(),
-            "message": "Text extracted successfully using Tesseract OCR"
+            "message": "Text extracted successfully using EasyOCR"
         }
     except Exception as e:
         print(f"Error processing image: {str(e)}")
