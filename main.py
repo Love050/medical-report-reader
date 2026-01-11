@@ -14,6 +14,7 @@ import os
 import httpx
 from dotenv import load_dotenv
 import json
+import json
 
 # Load environment variables
 load_dotenv()
@@ -375,7 +376,7 @@ async def extract_text_from_image(file: UploadFile = File(...)):
         print(f"Image received: {file.filename}, Size: {len(contents)} bytes")
         print(f"Image format: {image.format}, Size: {image.size}, Mode: {image.mode}")
         
-        # Try Tesseract OCR
+        # Use Tesseract OCR
         try:
             # Set Tesseract executable path
             pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -417,15 +418,14 @@ async def extract_text_from_image(file: UploadFile = File(...)):
                 }
             )
         
-        print("OCR successful!")
+        print("✅ OCR successful with Tesseract!")
         return {
             "success": True,
             "extracted_text": extracted_text.strip(),
             "message": "Text extracted successfully using Tesseract OCR"
         }
-    
     except Exception as e:
-        print(f"General OCR error: {str(e)}")
+        print(f"Error processing image: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
