@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Report Reader - Your Free Health Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <i class="fas fa-heartbeat"></i>
+                        <span>Health Report Reader</span>
+                    </div>
+                    <ul class="nav-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#demo-request" class="btn-nav">Request Demo</a></li>
+                    </ul>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">Understand Your Medical Reports <span class="highlight">Instantly</span></h1>
+                    <p class="hero-subtitle">Upload your medical report and get simple explanations, health advice, and personalized recommendations - all powered by AI, completely free!</p>
+                    <div class="hero-features">
+                        <div class="feature-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>100% Free</span>
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>No Signup Required</span>
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Multi-Language Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Section -->
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <h2>Upload Your Report</h2>
+                        <p>Select a clear, readable image of your medical report</p>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="upload-text">Drag & Drop your report here</p>
+                            <p class="upload-subtext">or</p>
+                            <button class="btn-upload" id="browseBtn">Browse Files</button>
+                            <p class="upload-info">Supported formats: JPG, PNG, PDF (Max 10MB)</p>
+                        </div>
+                        <div class="preview-area" id="previewArea" style="display: none;">
+                            <img id="previewImage" src="" alt="Preview">
+                            <button class="btn-remove" id="removeBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Language Selection -->
+                    <div class="language-selector">
+                        <label for="languageSelect">
+                            <i class="fas fa-language"></i>
+                            Choose Your Language
+                        </label>
+                        <select id="languageSelect" class="language-dropdown">
+                            <option value="en">English</option>
+                            <option value="hi">Hindi (हिंदी)</option>
+                            <option value="es">Spanish (Español)</option>
+                            <option value="fr">French (Français)</option>
+                            <option value="de">German (Deutsch)</option>
+                            <option value="zh">Chinese (中文)</option>
+                            <option value="ar">Arabic (العربية)</option>
+                            <option value="bn">Bengali (বাংলা)</option>
+                            <option value="pt">Portuguese (Português)</option>
+                            <option value="ru">Russian (Русский)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-analyze" id="analyzeBtn" disabled>
+                        <i class="fas fa-stethoscope"></i>
+                        Analyze Report
+                    </button>
+
+                    <!-- Loading State -->
+                    <div class="loading" id="loadingState" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Analyzing your report...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="results-section" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">Your Report Analysis</h2>
+            
+            <div class="results-grid">
+                <!-- Simplified Explanation -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Simple Explanation</h3>
+                    </div>
+                    <div class="result-content" id="simplifiedExplanation"></div>
+                </div>
+
+                <!-- Diet Advice -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-apple-alt"></i>
+                        <h3>Diet Recommendations</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="dietAdvice" class="recommendation-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Lifestyle Advice -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-heart"></i>
+                        <h3>Lifestyle Tips</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="lifestyleAdvice" class="recommendation-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Exercise Tips -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-running"></i>
+                        <h3>Exercise Recommendations</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="exerciseTips" class="recommendation-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Yoga Tips -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-spa"></i>
+                        <h3>Yoga & Mindfulness</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="yogaTips" class="recommendation-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Things to Avoid -->
+                <div class="result-card warning-card">
+                    <div class="result-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Things to Avoid</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="thingsToAvoid" class="recommendation-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Benefits -->
+                <div class="result-card success-card">
+                    <div class="result-header">
+                        <i class="fas fa-star"></i>
+                        <h3>Benefits of Following These Tips</h3>
+                    </div>
+                    <div class="result-content">
+                        <ul id="benefits" class="recommendation-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-new-analysis" id="newAnalysisBtn">
+                <i class="fas fa-plus"></i>
+                Analyze Another Report
+            </button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title">What Can Our Report Reader Do?</h2>
+            <p class="section-subtitle">Comprehensive health insights at your fingertips</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <h3>Read Medical Reports</h3>
+                    <p>Advanced OCR technology extracts text from your medical reports with high accuracy.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Multi-Language Translation</h3>
+                    <p>Get your report translated into your preferred language for better understanding.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <h3>Simple Language Explanation</h3>
+                    <p>Complex medical terms explained in easy-to-understand language.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3>Diet Recommendations</h3>
+                    <p>Personalized diet advice based on your health parameters.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3>Exercise & Yoga Tips</h3>
+                    <p>Tailored exercise routines and yoga practices for better health.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Prevention Guidance</h3>
+                    <p>Learn what to avoid to prevent health complications.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Simple steps to understand your health better</p>
+            
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3>Upload Report</h3>
+                    <p>Take a clear photo or upload an image of your medical report</p>
+                </div>
+
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Choose Language</h3>
+                    <p>Select your preferred language for the analysis</p>
+                </div>
+
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI Analysis</h3>
+                    <p>Our AI reads and analyzes your report in seconds</p>
+                </div>
+
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>Get Insights</h3>
+                    <p>Receive simple explanations and personalized health recommendations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Aim Section -->
+    <section class="aim-section">
+        <div class="container">
+            <div class="aim-content">
+                <div class="aim-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="aim-text">
+                    <h2>Our Mission</h2>
+                    <p>To make everyone know about their health, spread awareness, and make everyone's health better. We believe that understanding your health is the first step towards a healthier life.</p>
+                    <div class="aim-stats">
+                        <div class="stat">
+                            <h3>100%</h3>
+                            <p>Free Forever</p>
+                        </div>
+                        <div class="stat">
+                            <h3>15+</h3>
+                            <p>Languages</p>
+                        </div>
+                        <div class="stat">
+                            <h3>24/7</h3>
+                            <p>Available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is this service really free?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! Our Medical Report Reader is completely free with no hidden charges. We believe health awareness should be accessible to everyone.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do I need to create an account?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No signup or registration required! Simply upload your report and get instant results.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is my data secure and private?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We take privacy seriously. Your reports are processed securely and are not stored on our servers. All analysis is done in real-time.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What types of reports can I upload?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You can upload blood test reports, diagnostic reports, health checkup results, and most standard medical documents in image format (JPG, PNG, PDF).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I trust the AI recommendations?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Our AI provides general health guidance for awareness purposes. Always consult with qualified healthcare professionals for medical decisions and treatment.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Which languages are supported?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We support 15+ languages including English, Hindi, Spanish, French, German, Chinese, Arabic, Bengali, and more.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How accurate is the OCR text extraction?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Our OCR technology is highly accurate, but results depend on image quality. For best results, ensure your report is clear, well-lit, and in focus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Important Notice -->
+    <section class="notice-section">
+        <div class="container">
+            <div class="notice-card">
+                <div class="notice-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="notice-content">
+                    <h3>Important Notice</h3>
+                    <p><strong>This tool is AI-based and for informational purposes only.</strong> It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. This service is designed to help you understand your reports better and spread health awareness.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Request Section -->
+    <section id="demo-request" class="demo-section">
+        <div class="container">
+            <div class="demo-card">
+                <div class="demo-badge">
+                    <i class="fas fa-clock"></i>
+                    <span>Coming Soon</span>
+                </div>
+                <h2>Request Demo of Health Assistant</h2>
+                <p>Get early access to our comprehensive health assistant with advanced features including personalized health dashboard, health metrics tracking, AI health coach, and medication reminders.</p>
+                
+                <form class="demo-form" id="demoForm">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn-demo">
+                        <i class="fas fa-bell"></i>
+                        Notify Me
+                    </button>
+                </form>
+                <p class="demo-note">We'll notify you when the full health assistant is ready!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-heartbeat"></i> Health Report Reader</h3>
+                    <p>Making health awareness accessible to everyone, everywhere.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#" id="privacyLink">Privacy Policy</a></li>
+                        <li><a href="#" id="termsLink">Terms of Service</a></li>
+                        <li><a href="#" id="disclaimerLink">Disclaimer</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> support@healthreader.com</p>
+                    <p><i class="fas fa-phone"></i> +91 8755168431</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Health Report Reader. All rights reserved. Made with <i class="fas fa-heart"></i> for better health awareness.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Legal Modals -->
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="legal-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Privacy Policy</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Last Updated: January 10, 2026</strong></p>
+                
+                <h3>1. Information We Collect</h3>
+                <p>Health Report Reader is committed to protecting your privacy. We collect minimal information to provide our services:</p>
+                <ul>
+                    <li><strong>Medical Report Images:</strong> Images you upload are processed in real-time and are NOT stored on our servers.</li>
+                    <li><strong>Usage Data:</strong> We may collect anonymous usage statistics to improve our service.</li>
+                    <li><strong>Email Addresses:</strong> Only collected if you voluntarily submit them for demo notifications.</li>
+                </ul>
+
+                <h3>2. How We Use Your Information</h3>
+                <ul>
+                    <li>To provide OCR and analysis services for your medical reports</li>
+                    <li>To improve and optimize our services</li>
+                    <li>To send notifications about new features (only if you opted in)</li>
+                </ul>
+
+                <h3>3. Data Security</h3>
+                <p>We implement industry-standard security measures to protect your data. Your uploaded medical reports are:</p>
+                <ul>
+                    <li>Processed in real-time without permanent storage</li>
+                    <li>Transmitted using secure HTTPS connections</li>
+                    <li>Never shared with third parties</li>
+                    <li>Automatically deleted after processing</li>
+                </ul>
+
+                <h3>4. Your Medical Information</h3>
+                <p>We do NOT store, sell, or share your medical information with any third parties. All report processing happens in real-time, and no medical data is retained after you close your session.</p>
+
+                <h3>5. Cookies and Tracking</h3>
+                <p>We use minimal cookies for essential functionality. We do not use third-party tracking cookies or advertising networks.</p>
+
+                <h3>6. Third-Party Services</h3>
+                <p>Our service may integrate with AI APIs for text analysis. These integrations are configured to maintain privacy and not retain your medical data.</p>
+
+                <h3>7. Your Rights</h3>
+                <p>You have the right to:</p>
+                <ul>
+                    <li>Use our service without creating an account</li>
+                    <li>Request deletion of any stored data (email addresses)</li>
+                    <li>Opt-out of communications at any time</li>
+                </ul>
+
+                <h3>8. Children's Privacy</h3>
+                <p>Our service is not directed to children under 13. We do not knowingly collect information from children.</p>
+
+                <h3>9. Changes to Privacy Policy</h3>
+                <p>We may update this policy occasionally. Changes will be posted on this page with an updated date.</p>
+
+                <h3>10. Contact Us</h3>
+                <p>For privacy concerns, contact us at: <a href="mailto:privacy@healthreader.com">privacy@healthreader.com</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="legal-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Terms of Service</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Last Updated: January 10, 2026</strong></p>
+                
+                <h3>1. Acceptance of Terms</h3>
+                <p>By accessing and using Health Report Reader, you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use our service.</p>
+
+                <h3>2. Service Description</h3>
+                <p>Health Report Reader is a free, AI-powered tool that provides:</p>
+                <ul>
+                    <li>OCR text extraction from medical reports</li>
+                    <li>Simplified explanations of medical terminology</li>
+                    <li>General health and wellness recommendations</li>
+                    <li>Multi-language translation services</li>
+                </ul>
+
+                <h3>3. No Medical Advice</h3>
+                <p><strong>IMPORTANT:</strong> This service does NOT provide medical advice, diagnosis, or treatment. All information is for educational and informational purposes only. Always consult qualified healthcare professionals for medical decisions.</p>
+
+                <h3>4. User Responsibilities</h3>
+                <p>You agree to:</p>
+                <ul>
+                    <li>Use the service responsibly and legally</li>
+                    <li>Not upload false, misleading, or fraudulent information</li>
+                    <li>Not use the service for commercial purposes without permission</li>
+                    <li>Not attempt to reverse engineer or hack our systems</li>
+                    <li>Seek professional medical advice for health concerns</li>
+                </ul>
+
+                <h3>5. Service Availability</h3>
+                <p>We strive to provide reliable service but do not guarantee:</p>
+                <ul>
+                    <li>Uninterrupted availability (maintenance may be required)</li>
+                    <li>Error-free operation</li>
+                    <li>Accuracy of all AI-generated content</li>
+                </ul>
+
+                <h3>6. Intellectual Property</h3>
+                <p>All content, design, and functionality of this service are owned by Health Report Reader and protected by copyright laws. You may not:</p>
+                <ul>
+                    <li>Copy or reproduce our service without permission</li>
+                    <li>Use our branding without authorization</li>
+                    <li>Create derivative works based on our service</li>
+                </ul>
+
+                <h3>7. Limitation of Liability</h3>
+                <p>Health Report Reader is provided "AS IS" without warranties. We are not liable for:</p>
+                <ul>
+                    <li>Any damages arising from use of our service</li>
+                    <li>Decisions made based on our AI-generated content</li>
+                    <li>Medical outcomes or health consequences</li>
+                    <li>Loss of data or service interruptions</li>
+                </ul>
+
+                <h3>8. Indemnification</h3>
+                <p>You agree to indemnify and hold Health Report Reader harmless from any claims arising from your use of the service or violation of these terms.</p>
+
+                <h3>9. Modifications to Service</h3>
+                <p>We reserve the right to modify or discontinue the service at any time without notice.</p>
+
+                <h3>10. Termination</h3>
+                <p>We may terminate or suspend access to our service immediately for any violation of these terms.</p>
+
+                <h3>11. Governing Law</h3>
+                <p>These terms are governed by applicable laws. Any disputes will be resolved in appropriate jurisdiction.</p>
+
+                <h3>12. Contact</h3>
+                <p>For questions about these terms, contact: <a href="mailto:legal@healthreader.com">legal@healthreader.com</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Modal -->
+    <div id="disclaimerModal" class="legal-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Medical Disclaimer</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Last Updated: January 10, 2026</strong></p>
+                
+                <h3>Important Medical Disclaimer</h3>
+                <p><strong>PLEASE READ THIS CAREFULLY BEFORE USING OUR SERVICE</strong></p>
+
+                <h3>1. Not Medical Advice</h3>
+                <p>Health Report Reader is an informational tool powered by artificial intelligence. The content provided through our service:</p>
+                <ul>
+                    <li>Is NOT medical advice</li>
+                    <li>Is NOT a substitute for professional medical consultation</li>
+                    <li>Should NOT be used for diagnosis or treatment decisions</li>
+                    <li>Is for educational and awareness purposes only</li>
+                </ul>
+
+                <h3>2. AI-Generated Content</h3>
+                <p>All analysis, recommendations, and explanations are generated by artificial intelligence and may contain:</p>
+                <ul>
+                    <li>Inaccuracies or errors</li>
+                    <li>Incomplete information</li>
+                    <li>Generalized advice not specific to your condition</li>
+                    <li>Outdated medical information</li>
+                </ul>
+
+                <h3>3. Consult Healthcare Professionals</h3>
+                <p><strong>Always consult qualified healthcare professionals:</strong></p>
+                <ul>
+                    <li>Before making any medical decisions</li>
+                    <li>For diagnosis of medical conditions</li>
+                    <li>For treatment recommendations</li>
+                    <li>If you have health concerns or symptoms</li>
+                    <li>Before starting any diet, exercise, or wellness program</li>
+                    <li>Before changing or stopping medications</li>
+                </ul>
+
+                <h3>4. Emergency Situations</h3>
+                <p><strong>DO NOT use this service for medical emergencies.</strong> If you are experiencing a medical emergency, call emergency services immediately or go to the nearest emergency room.</p>
+
+                <h3>5. No Doctor-Patient Relationship</h3>
+                <p>Use of this service does NOT create a doctor-patient relationship. We do not provide personalized medical care or treatment.</p>
+
+                <h3>6. OCR Accuracy</h3>
+                <p>Text extraction from medical reports may contain errors due to:</p>
+                <ul>
+                    <li>Image quality issues</li>
+                    <li>Handwriting interpretation</li>
+                    <li>Technical limitations of OCR technology</li>
+                </ul>
+                <p>Always verify extracted information against your original report.</p>
+
+                <h3>7. General Health Information</h3>
+                <p>Diet, exercise, and lifestyle recommendations provided are general wellness suggestions and may not be appropriate for your specific health condition, age, fitness level, or medical history.</p>
+
+                <h3>8. No Guarantee of Results</h3>
+                <p>We make no guarantees about:</p>
+                <ul>
+                    <li>Accuracy of AI-generated content</li>
+                    <li>Health outcomes from following recommendations</li>
+                    <li>Completeness of information provided</li>
+                </ul>
+
+                <h3>9. Medication and Treatment</h3>
+                <p><strong>NEVER:</strong></p>
+                <ul>
+                    <li>Start, stop, or change medications based on our service</li>
+                    <li>Disregard professional medical advice</li>
+                    <li>Delay seeking medical care based on information from our service</li>
+                </ul>
+
+                <h3>10. Individual Circumstances</h3>
+                <p>Every person's health situation is unique. Information provided may not apply to your specific circumstances. Only your healthcare provider can give advice based on your complete medical history.</p>
+
+                <h3>11. Translation Services</h3>
+                <p>Translated content may lose accuracy or meaning. For critical medical information, consult a professional medical translator or bilingual healthcare provider.</p>
+
+                <h3>12. Assumption of Risk</h3>
+                <p>By using this service, you acknowledge that you understand and accept these limitations and agree to use the information at your own risk.</p>
+
+                <h3>13. Updates to Medical Information</h3>
+                <p>Medical knowledge evolves constantly. Information provided may become outdated. Always verify with current medical guidelines and your healthcare provider.</p>
+
+                <h3>14. Liability</h3>
+                <p>Health Report Reader, its creators, operators, and affiliates are not liable for any health outcomes, medical decisions, or consequences resulting from use of this service.</p>
+
+                <p><strong>By using this service, you acknowledge that you have read, understood, and agree to this disclaimer.</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
